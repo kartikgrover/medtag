@@ -84,21 +84,22 @@ pre{font:400 12px var(--mono);background:var(--bg);border:1px solid var(--line);
     <form class="panel" id="form" autocomplete="off">
       <div><span class="chip">Example data</span> <span class="note">Replace with real details. The QR holds a link with the details packed inside it; nothing is stored online.</span></div>
       <div class="row">
-        <label>Rank<input id="f-rank" value="Capt"></label>
-        <label>Full name<input id="f-name" value="Vikram Rao"></label>
+        <label>Rank<input id="f-rank" value="Lt"></label>
+        <label>Full name<input id="f-name" value="John Doe"></label>
       </div>
       <div class="row">
-        <label>Army number<input id="f-no" value="IC-78231K"></label>
-        <label>Date of birth<input id="f-dob" type="date" value="1994-03-12"></label>
+        <label>Army number<input id="f-no" value="IC-12345A"></label>
+        <label>Date of birth<input id="f-dob" type="date" value="1998-01-15"></label>
         <label>Blood group
           <select id="f-bg"><option>O+</option><option>O-</option><option>A+</option><option>A-</option><option>B+</option><option>B-</option><option>AB+</option><option>AB-</option></select>
         </label>
       </div>
-      <label>Allergies<input id="f-alg" value="Penicillin"></label>
       <div class="row">
-        <label>Conditions<input id="f-cond" value="Mild asthma"></label>
-        <label>Medications<input id="f-meds" value="Salbutamol inhaler PRN"></label>
+        <label>Unit / Formation<input id="f-unit" value="1 Example Regt, 99 Inf Bde"></label>
+        <label>Emergency contact no.<input id="f-ice" value="+91 98100 00000"></label>
       </div>
+      <label>Medical history<input id="f-cond" value="Mild asthma"></label>
+      <label>Allergy, if any<input id="f-alg" value="Penicillin"></label>
       <div class="photo-row">
         <img id="thumb" class="thumb" alt="Photo stored in QR">
         <div style="display:grid;gap:8px">
@@ -161,8 +162,8 @@ pre{font:400 12px var(--mono);background:var(--bg);border:1px solid var(--line);
 <script>
 qrcode.stringToBytes = qrcode.stringToBytesFuncs["UTF-8"];
 const $ = id => document.getElementById(id);
-const F = ["rank","name","no","dob","bg","alg","cond","meds"];
-const KEYS = {rank:"RANK",name:"NAME",no:"NO",dob:"DOB",bg:"BG",alg:"ALG",cond:"COND",meds:"MEDS",ice:"ICE"};
+const F = ["rank","name","no","unit","dob","bg","ice","cond","alg"];
+const KEYS = {rank:"RANK",name:"NAME",no:"NO",unit:"UNIT",dob:"DOB",bg:"BG",alg:"ALG",cond:"COND",ice:"ICE"};
 let photo = null; // {type:'W'|'J', b64, url}
 let lastQR = null;
 
@@ -275,7 +276,7 @@ function showResult(text){
   $("r-rank").textContent=o.RANK||"";
   $("r-name").textContent=o.NAME||"Name not given";
   $("r-bg").textContent=o.BG||"--";
-  const rows=[["Army no.",o.NO],["Born",o.DOB?o.DOB+age(o.DOB):""],["Allergies",o.ALG,true],["Conditions",o.COND],["Medications",o.MEDS],["Emergency",o.ICE]];
+  const rows=[["Army no.",o.NO],["Unit / Fmn",o.UNIT],["DOB",o.DOB?o.DOB+age(o.DOB):""],["Emergency no.",o.ICE],["Medical history",o.COND],["Allergy",o.ALG,true]];
   const dl=$("r-dl"); dl.textContent="";
   for(const [k,v,alert] of rows){ if(!v) continue; const dt=document.createElement("dt"); dt.textContent=k; const dd=document.createElement("dd"); dd.textContent=v; if(alert) dd.className="alert"; dl.append(dt,dd); }
   const im=o.IMG; const p=$("r-photo");
