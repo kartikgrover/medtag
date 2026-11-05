@@ -1,0 +1,340 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><style>body{margin:0}[hidden]{display:none!important}img{max-width:100%}</style></head><body>
+<title>MedTag QR</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Stencil+Display:wght@700;800&family=Public+Sans:wght@400;600;700&family=IBM+Plex+Mono:wght@400;600&display=swap">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
+<style>
+/* Layout: field-manual tool, form left / tag preview right, stacks on phone */
+:root{
+  --bg:#E8EAE1; --panel:#F5F6F0; --fg:#1C2116; --muted:#5B6250; --line:#C6CBB9;
+  --olive:#4A5A27; --olive-ink:#F3F5EA; --red:#B3261E; --red-bg:#F6DEDB;
+  --display:"Big Shoulders Stencil Display","Arial Narrow",Impact,sans-serif;
+  --body:"Public Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,Menlo,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#14170F; --panel:#1D2117; --fg:#E3E6D8; --muted:#A1A890; --line:#353B2B;
+  --olive:#A8B978; --olive-ink:#14170F; --red:#F08A80; --red-bg:#3A1A17; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#14170F; --panel:#1D2117; --fg:#E3E6D8; --muted:#A1A890; --line:#353B2B;
+  --olive:#A8B978; --olive-ink:#14170F; --red:#F08A80; --red-bg:#3A1A17; color-scheme:dark}
+body{background:var(--bg);color:var(--fg);font-family:var(--body);font-size:15px;line-height:1.5}
+.wrap{max-width:1040px;margin:0 auto;padding-block:20px 48px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:grid;gap:20px}
+header{display:flex;flex-wrap:wrap;align-items:end;justify-content:space-between;gap:12px}
+h1{font-family:var(--display);font-weight:800;font-size:44px;line-height:1;margin:0;letter-spacing:.02em;text-wrap:balance}
+.sub{color:var(--muted);margin:4px 0 0;max-width:60ch}
+.tabs{display:flex;gap:4px;background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:4px}
+.tabs button{font:600 14px var(--body);border:0;background:none;color:var(--muted);padding:8px 16px;border-radius:5px;cursor:pointer}
+.tabs button[aria-selected="true"]{background:var(--olive);color:var(--olive-ink)}
+.grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,380px);gap:20px;align-items:start}
+@media (max-width:820px){.grid{grid-template-columns:minmax(0,1fr)}}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:20px;display:grid;gap:14px;min-width:0}
+.row{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px}
+label{display:grid;gap:4px;font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+input,select,textarea{font:400 15px var(--body);color:var(--fg);background:var(--bg);border:1px solid var(--line);border-radius:6px;padding:9px 10px;width:100%;box-sizing:border-box;text-transform:none;letter-spacing:0}
+textarea{resize:vertical;min-height:44px}
+input:focus-visible,select:focus-visible,textarea:focus-visible,button:focus-visible{outline:2px solid var(--olive);outline-offset:2px}
+.photo-row{display:flex;gap:14px;align-items:center;flex-wrap:wrap}
+.thumb{width:72px;height:90px;border-radius:4px;border:1px solid var(--line);background:var(--bg);object-fit:cover;image-rendering:auto}
+.btn{font:600 14px var(--body);border:1px solid var(--olive);background:var(--olive);color:var(--olive-ink);padding:10px 16px;border-radius:6px;cursor:pointer}
+.btn.ghost{background:none;color:var(--olive)}
+.btn:disabled{opacity:.5;cursor:default}
+.check{display:flex;gap:8px;align-items:center;text-transform:none;letter-spacing:0;font-size:14px;font-weight:600;color:var(--fg)}
+.check input{width:auto}
+.chip{display:inline-block;font:600 11px var(--mono);letter-spacing:.06em;text-transform:uppercase;padding:2px 8px;border-radius:99px;background:var(--red-bg);color:var(--red)}
+.tag{background:#fff;color:#111;border-radius:12px;padding:16px;display:grid;gap:10px;border:1px solid var(--line)}
+.tag-head{display:flex;justify-content:space-between;gap:8px;align-items:start}
+.tag-name{font-family:var(--display);font-weight:800;font-size:26px;line-height:1.05}
+.tag-no{font:600 14px var(--mono)}
+.tag-bg{font-family:var(--display);font-weight:800;font-size:34px;line-height:1;color:#B3261E}
+#qr{width:100%;height:auto;image-rendering:pixelated;display:block}
+.meta{font:400 13px var(--mono);color:var(--muted);display:grid;gap:2px}
+.meta b{color:var(--fg);font-weight:600}
+.err{color:var(--red);font-weight:600}
+.actions{display:flex;gap:8px;flex-wrap:wrap}
+.card{display:grid;grid-template-columns:96px minmax(0,1fr);gap:16px;align-items:start}
+.card img{width:96px;height:120px;object-fit:cover;border-radius:4px;border:1px solid var(--line);background:var(--bg)}
+.card h2{font-family:var(--display);font-weight:800;font-size:32px;line-height:1.05;margin:0}
+dl{margin:0;display:grid;grid-template-columns:auto minmax(0,1fr);gap:6px 14px}
+dt{font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);padding-top:2px}
+dd{margin:0;overflow-wrap:anywhere}
+dd.alert{color:var(--red);font-weight:700}
+.big-bg{font-family:var(--display);font-weight:800;font-size:56px;line-height:1;color:var(--red)}
+.note{font-size:13px;color:var(--muted)}
+pre{font:400 12px var(--mono);background:var(--bg);border:1px solid var(--line);border-radius:6px;padding:10px;overflow-x:auto;white-space:pre-wrap;word-break:break-all;max-height:180px;margin:0}
+</style>
+
+<div class="wrap">
+  <header>
+    <div>
+      <h1>MEDTAG QR</h1>
+      <p class="sub">A worn QR that carries ID and medical details offline. Any phone camera reads the text; the scanner here also shows the photo.</p>
+    </div>
+    <div class="tabs" role="tablist">
+      <button id="tab-make" role="tab" aria-selected="true">Make tag</button>
+      <button id="tab-scan" role="tab" aria-selected="false">Scan tag</button>
+    </div>
+  </header>
+
+  <section id="view-make" class="grid">
+    <form class="panel" id="form" autocomplete="off">
+      <div><span class="chip">Example data</span> <span class="note">Replace with real details. The QR holds a link with the details packed inside it; nothing is stored online.</span></div>
+      <div class="row">
+        <label>Rank<input id="f-rank" value="Capt"></label>
+        <label>Full name<input id="f-name" value="Vikram Rao"></label>
+      </div>
+      <div class="row">
+        <label>Army number<input id="f-no" value="IC-78231K"></label>
+        <label>Date of birth<input id="f-dob" type="date" value="1994-03-12"></label>
+        <label>Blood group
+          <select id="f-bg"><option>O+</option><option>O-</option><option>A+</option><option>A-</option><option>B+</option><option>B-</option><option>AB+</option><option>AB-</option></select>
+        </label>
+      </div>
+      <label>Allergies<input id="f-alg" value="Penicillin"></label>
+      <div class="row">
+        <label>Conditions<input id="f-cond" value="Mild asthma"></label>
+        <label>Medications<input id="f-meds" value="Salbutamol inhaler PRN"></label>
+      </div>
+      <div class="photo-row">
+        <img id="thumb" class="thumb" alt="Photo stored in QR">
+        <div style="display:grid;gap:8px">
+          <label class="btn ghost" style="text-transform:none;letter-spacing:0;font-size:14px;color:var(--olive)">Upload photo<input id="f-photo" type="file" accept="image/*" hidden></label>
+          <label class="check"><input id="f-incphoto" type="checkbox" checked> Put photo inside QR</label>
+        </div>
+      </div>
+      <label>Damage tolerance
+        <select id="f-ec">
+          <option value="L">Low, 7% (smallest QR)</option>
+          <option value="M" selected>Medium, 15%</option>
+          <option value="Q">High, 25%</option>
+          <option value="H">Max, 30% (worn or dirty patch)</option>
+        </select>
+      </label>
+    </form>
+
+    <div class="panel">
+      <div class="tag" id="tag">
+        <div class="tag-head">
+          <div><div class="tag-name" id="t-name"></div><div class="tag-no" id="t-no"></div></div>
+          <div class="tag-bg" id="t-bg"></div>
+        </div>
+        <canvas id="qr" width="10" height="10" aria-label="Generated QR code"></canvas>
+      </div>
+      <div class="meta" id="meta"></div>
+      <div class="actions">
+        <button class="btn" id="btn-test" type="button">Test scan</button>
+        <button class="btn ghost" id="btn-save" type="button" hidden>Save PNG</button>
+      </div>
+    </div>
+  </section>
+
+  <section id="view-scan" class="grid" hidden>
+    <div class="panel">
+      <p style="margin:0">Take a photo of a MedTag QR, or pick a screenshot of one.</p>
+      <div class="actions">
+        <label class="btn" style="text-transform:none;letter-spacing:0;font-size:14px;color:var(--olive-ink)">Take or choose photo<input id="scan-file" type="file" accept="image/*" capture="environment" hidden></label>
+      </div>
+      <div id="scan-status" class="note"></div>
+      <div id="result" hidden>
+        <div class="card">
+          <img id="r-photo" alt="Photo from QR">
+          <div style="display:grid;gap:12px;min-width:0">
+            <div><div class="note" id="r-rank"></div><h2 id="r-name"></h2></div>
+            <dl id="r-dl"></dl>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="panel">
+      <div class="note">Blood group</div>
+      <div class="big-bg" id="r-bg">--</div>
+      <div class="note">Raw text in the QR</div>
+      <pre id="r-raw">Scan a tag to see what it holds.</pre>
+    </div>
+  </section>
+</div>
+
+<script>
+qrcode.stringToBytes = qrcode.stringToBytesFuncs["UTF-8"];
+const $ = id => document.getElementById(id);
+const F = ["rank","name","no","dob","bg","alg","cond","meds"];
+const KEYS = {rank:"RANK",name:"NAME",no:"NO",dob:"DOB",bg:"BG",alg:"ALG",cond:"COND",meds:"MEDS",ice:"ICE"};
+let photo = null; // {type:'W'|'J', b64, url}
+let lastQR = null;
+
+function setTab(t){
+  $("tab-make").setAttribute("aria-selected", t==="make");
+  $("tab-scan").setAttribute("aria-selected", t==="scan");
+  $("view-make").hidden = t!=="make"; $("view-scan").hidden = t!=="scan";
+}
+$("tab-make").onclick = () => setTab("make");
+$("tab-scan").onclick = () => setTab("scan");
+
+function loadImage(src){ return new Promise((res,rej)=>{ const i=new Image(); i.onload=()=>res(i); i.onerror=rej; i.src=src; }); }
+
+// Shrink to a tiny grayscale portrait so it fits a QR; WebP where the browser can encode it.
+function encodePhoto(img){
+  const sizes=[[72,90],[60,75],[48,60],[40,50]], qs=[0.6,0.45,0.3,0.2], budget=1000;
+  let last=null;
+  for(const [w,h] of sizes) for(const q of qs){
+    const c=document.createElement("canvas"); c.width=w; c.height=h;
+    const x=c.getContext("2d");
+    const r=Math.max(w/img.width,h/img.height), sw=w/r, sh=h/r;
+    x.drawImage(img,(img.width-sw)/2,(img.height-sh)*0.3,sw,sh,0,0,w,h);
+    const d=x.getImageData(0,0,w,h), p=d.data;
+    for(let i=0;i<p.length;i+=4){ const g=0.299*p[i]+0.587*p[i+1]+0.114*p[i+2]; p[i]=p[i+1]=p[i+2]=g; }
+    x.putImageData(d,0,0);
+    let url=c.toDataURL("image/webp",q), type="W";
+    if(!url.startsWith("data:image/webp")){ url=c.toDataURL("image/jpeg",q); type="J"; }
+    last={type,b64:url.split(",")[1],url};
+    if(last.b64.length<=budget) return last;
+  }
+  return last;
+}
+
+function samplePortrait(){
+  const c=document.createElement("canvas"); c.width=240; c.height=300; const x=c.getContext("2d");
+  const g=x.createLinearGradient(0,0,0,300); g.addColorStop(0,"#9aa58a"); g.addColorStop(1,"#5f6a4c");
+  x.fillStyle=g; x.fillRect(0,0,240,300);
+  x.fillStyle="#2f3527"; x.beginPath(); x.ellipse(120,300,110,80,0,Math.PI,0); x.fill();
+  x.fillStyle="#c9b8a4"; x.beginPath(); x.ellipse(120,125,52,64,0,0,Math.PI*2); x.fill();
+  x.fillStyle="#3c4430"; x.beginPath(); x.ellipse(120,72,58,26,0,Math.PI,0); x.fill(); x.fillRect(62,66,116,14);
+  return c.toDataURL("image/png");
+}
+
+function clean(s){ return String(s||"").replace(/[\r\n]+/g," ").trim(); }
+
+function buildPayload(){
+  const lines=["MEDTAG/1"];
+  for(const f of F){ const v=clean($("f-"+f).value); if(v) lines.push(KEYS[f]+":"+v); }
+  if($("f-incphoto").checked && photo) lines.push("IMG:"+photo.type+photo.b64.replace(/\+/g,"-").replace(/\//g,"_").replace(/=+$/,""));
+  return SITE+"#"+encodeURIComponent(lines.join("\n"));
+}
+const SITE="https://kartikgrover.github.io/medtag/";
+function fromLink(t){
+  const i=t.indexOf("#"); if(!t.startsWith("http")||i<0) return t;
+  try{ return decodeURIComponent(t.slice(i+1)); }catch{ return t; }
+}
+
+function render(){
+  $("t-name").textContent=[clean($("f-rank").value),clean($("f-name").value)].filter(Boolean).join(" ");
+  $("t-no").textContent=clean($("f-no").value);
+  $("t-bg").textContent=$("f-bg").value;
+  const text=buildPayload(), ec=$("f-ec").value;
+  const bytes=new TextEncoder().encode(text).length;
+  let qr;
+  try{ qr=qrcode(0,ec); qr.addData(text,"Byte"); qr.make(); }
+  catch(e){
+    lastQR=null; $("btn-test").disabled=true;
+    $("meta").innerHTML='<span class="err">Too much data for this damage tolerance. Lower it, shorten the text, or leave the photo out.</span>';
+    return;
+  }
+  lastQR=qr; $("btn-test").disabled=false;
+  const n=qr.getModuleCount(), quiet=4, s=Math.max(4,Math.floor(720/(n+quiet*2)));
+  const cv=$("qr"), size=(n+quiet*2)*s; cv.width=size; cv.height=size;
+  const x=cv.getContext("2d"); x.fillStyle="#fff"; x.fillRect(0,0,size,size); x.fillStyle="#000";
+  for(let r=0;r<n;r++) for(let c=0;c<n;c++) if(qr.isDark(r,c)) x.fillRect((c+quiet)*s,(r+quiet)*s,s,s);
+  const cm=((n+quiet*2)*0.05).toFixed(1);
+  $("meta").innerHTML=
+    `<div>Holds <b>${bytes} bytes</b>${photo&&$("f-incphoto").checked?` (photo ${photo.b64.length})`:""}</div>`+
+    `<div>QR version <b>${(n-17)/4}</b>, ${n}×${n} modules</div>`+
+    `<div>Print at least <b>${cm} cm</b> wide for a reliable phone scan</div>`;
+}
+
+$("form").addEventListener("input",render);
+$("form").addEventListener("submit",e=>e.preventDefault());
+
+$("f-photo").addEventListener("change",async e=>{
+  const file=e.target.files[0]; if(!file) return;
+  const url=URL.createObjectURL(file);
+  try{ const img=await loadImage(url); photo=encodePhoto(img); $("thumb").src=photo.url; render(); }
+  catch{ $("meta").innerHTML='<span class="err">That file could not be read as an image. Try a JPG or PNG.</span>'; }
+  finally{ URL.revokeObjectURL(url); }
+});
+
+function parse(text){
+  const lines=text.split("\n");
+  if(!lines[0].startsWith("MEDTAG")) return null;
+  const o={};
+  for(const l of lines.slice(1)){ const i=l.indexOf(":"); if(i>0) o[l.slice(0,i)]=l.slice(i+1); }
+  return o;
+}
+
+function age(dob){ const d=new Date(dob); if(isNaN(d)) return ""; const n=new Date(); let a=n.getFullYear()-d.getFullYear(); if(n<new Date(n.getFullYear(),d.getMonth(),d.getDate())) a--; return ` (age ${a})`; }
+
+function showResult(text){
+  text=fromLink(text);
+  $("r-raw").textContent=text.length>600?text.slice(0,600)+"…":text;
+  const o=parse(text);
+  if(!o){ $("result").hidden=true; $("scan-status").innerHTML='<span class="err">This QR is not a MedTag. Its text is shown on the right.</span>'; return; }
+  $("scan-status").textContent="Details read from the QR link.";
+  $("r-rank").textContent=o.RANK||"";
+  $("r-name").textContent=o.NAME||"Name not given";
+  $("r-bg").textContent=o.BG||"--";
+  const rows=[["Army no.",o.NO],["Born",o.DOB?o.DOB+age(o.DOB):""],["Allergies",o.ALG,true],["Conditions",o.COND],["Medications",o.MEDS],["Emergency",o.ICE]];
+  const dl=$("r-dl"); dl.textContent="";
+  for(const [k,v,alert] of rows){ if(!v) continue; const dt=document.createElement("dt"); dt.textContent=k; const dd=document.createElement("dd"); dd.textContent=v; if(alert) dd.className="alert"; dl.append(dt,dd); }
+  const im=o.IMG; const p=$("r-photo");
+  if(im){ p.src=`data:image/${im[0]==="W"?"webp":"jpeg"};base64,${im.slice(1).replace(/-/g,"+").replace(/_/g,"/")}`; p.hidden=false; } else p.hidden=true;
+  $("result").hidden=false;
+}
+
+function decodeCanvas(cv){
+  const d=cv.getContext("2d").getImageData(0,0,cv.width,cv.height);
+  const r=jsQR(d.data,d.width,d.height,{inversionAttempts:"attemptBoth"});
+  return r?new TextDecoder("utf-8").decode(new Uint8Array(r.binaryData)):null;
+}
+
+$("btn-test").onclick=()=>{
+  const t=decodeCanvas($("qr"));
+  setTab("scan");
+  if(t) showResult(t); else $("scan-status").innerHTML='<span class="err">The test scan failed. Try a higher damage tolerance.</span>';
+};
+
+$("scan-file").addEventListener("change",async e=>{
+  const file=e.target.files[0]; if(!file) return;
+  $("scan-status").textContent="Reading…";
+  const url=URL.createObjectURL(file);
+  try{
+    const img=await loadImage(url);
+    if("BarcodeDetector" in window){
+      try{ const r=await new BarcodeDetector({formats:["qr_code"]}).detect(img); if(r[0]){ showResult(r[0].rawValue); return; } }catch{}
+    }
+    for(const max of [1600,1000,2400]){
+      const k=Math.min(1,max/Math.max(img.width,img.height));
+      const c=document.createElement("canvas"); c.width=Math.round(img.width*k); c.height=Math.round(img.height*k);
+      c.getContext("2d").drawImage(img,0,0,c.width,c.height);
+      const t=decodeCanvas(c); if(t){ showResult(t); return; }
+    }
+    $("scan-status").innerHTML='<span class="err">No QR found. Fill the frame with the code, hold steady, and avoid glare.</span>';
+  }catch{ $("scan-status").innerHTML='<span class="err">That file could not be read as an image.</span>'; }
+  finally{ URL.revokeObjectURL(url); e.target.value=""; }
+});
+
+(async()=>{
+  const img=await loadImage(samplePortrait());
+  photo=encodePhoto(img); $("thumb").src=photo.url; render();
+  if(location.hash.length>1){ setTab("scan"); showResult(location.href); }
+  window.addEventListener("hashchange",()=>{ setTab("scan"); showResult(location.href); });
+  const dl={save:async({filename,data})=>{ const a=document.createElement("a"); a.href=URL.createObjectURL(data); a.download=filename; a.click(); setTimeout(()=>URL.revokeObjectURL(a.href),5000); }};
+  const b=$("btn-save"); b.hidden=false;
+  b.onclick=async()=>{
+    if(!lastQR) return;
+    const q=$("qr"), W=q.width, H=W+150, c=document.createElement("canvas"); c.width=W; c.height=H;
+    const x=c.getContext("2d"); x.fillStyle="#fff"; x.fillRect(0,0,W,H);
+    x.fillStyle="#111"; x.font="800 44px 'Big Shoulders Stencil Display', Impact, sans-serif";
+    x.fillText($("t-name").textContent,30,60);
+    x.font="600 28px 'IBM Plex Mono', monospace"; x.fillText($("t-no").textContent,30,105);
+    x.fillStyle="#B3261E"; x.font="800 72px 'Big Shoulders Stencil Display', Impact, sans-serif"; x.textAlign="right";
+    x.fillText($("t-bg").textContent,W-30,95);
+    x.drawImage(q,0,140);
+    const blob=await new Promise(r=>c.toBlob(r,"image/png"));
+    try{ await dl.save({filename:`medtag-${clean($("f-no").value)||"tag"}.png`,data:blob}); }catch{}
+  };
+})();
+</script>
+
+</body></html>
