@@ -64,6 +64,7 @@ dd{margin:0;overflow-wrap:anywhere}
 dd.alert{color:var(--red);font-weight:700}
 .big-bg{font-family:var(--display);font-weight:800;font-size:56px;line-height:1;color:var(--red)}
 .note{font-size:13px;color:var(--muted)}
+.viewer .tabs,.viewer #view-make,.viewer .sub,.viewer #view-scan>.panel>p,.viewer #view-scan .actions,.viewer #r-raw,.viewer #r-raw-label{display:none!important}
 pre{font:400 12px var(--mono);background:var(--bg);border:1px solid var(--line);border-radius:6px;padding:10px;overflow-x:auto;white-space:pre-wrap;word-break:break-all;max-height:180px;margin:0}
 </style>
 
@@ -151,7 +152,7 @@ pre{font:400 12px var(--mono);background:var(--bg);border:1px solid var(--line);
     <div class="panel">
       <div class="note">Blood group</div>
       <div class="big-bg" id="r-bg">--</div>
-      <div class="note">Raw text in the QR</div>
+      <div class="note" id="r-raw-label">Raw text in the QR</div>
       <pre id="r-raw">Scan a tag to see what it holds.</pre>
     </div>
   </section>
@@ -317,8 +318,9 @@ $("scan-file").addEventListener("change",async e=>{
 (async()=>{
   const img=await loadImage(samplePortrait());
   photo=encodePhoto(img); $("thumb").src=photo.url; render();
-  if(location.hash.length>1){ setTab("scan"); showResult(location.href); }
-  window.addEventListener("hashchange",()=>{ setTab("scan"); showResult(location.href); });
+  const viewOnly=()=>{ document.body.classList.add("viewer"); setTab("scan"); showResult(location.href); };
+  if(location.hash.length>1) viewOnly();
+  window.addEventListener("hashchange",viewOnly);
   const dl={save:async({filename,data})=>{ const a=document.createElement("a"); a.href=URL.createObjectURL(data); a.download=filename; a.click(); setTimeout(()=>URL.revokeObjectURL(a.href),5000); }};
   const b=$("btn-save"); b.hidden=false;
   b.onclick=async()=>{
