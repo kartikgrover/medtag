@@ -58,7 +58,8 @@ input:focus-visible,select:focus-visible,textarea:focus-visible,button:focus-vis
 .card{display:grid;grid-template-columns:96px minmax(0,1fr);gap:16px;align-items:start}
 .card img{width:96px;height:120px;object-fit:cover;border-radius:4px;border:1px solid var(--line);background:var(--bg)}
 .card h2{font-family:var(--display);font-weight:800;font-size:32px;line-height:1.05;margin:0}
-dl{margin:0;display:grid;grid-template-columns:auto minmax(0,1fr);gap:6px 14px}
+.card.nophoto{grid-template-columns:minmax(0,1fr)}
+dl{margin:0;display:grid;grid-template-columns:max-content minmax(0,1fr);gap:6px 14px}
 dt{font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);padding-top:2px}
 dd{margin:0;overflow-wrap:anywhere}
 dd.alert{color:var(--red);font-weight:700}
@@ -281,6 +282,7 @@ function showResult(text){
   for(const [k,v,alert] of rows){ if(!v) continue; const dt=document.createElement("dt"); dt.textContent=k; const dd=document.createElement("dd"); dd.textContent=v; if(alert) dd.className="alert"; dl.append(dt,dd); }
   const im=o.IMG; const p=$("r-photo");
   if(im){ p.src=`data:image/${im[0]==="W"?"webp":"jpeg"};base64,${im.slice(1).replace(/-/g,"+").replace(/_/g,"/")}`; p.hidden=false; } else p.hidden=true;
+  p.parentElement.classList.toggle("nophoto",!im);
   $("result").hidden=false;
 }
 
