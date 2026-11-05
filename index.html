@@ -145,7 +145,7 @@ pre{font:400 12px var(--mono);background:var(--bg);border:1px solid var(--line);
         <div class="card">
           <img id="r-photo" alt="Photo from QR">
           <div style="display:grid;gap:12px;min-width:0">
-            <div><div class="note" id="r-rank"></div><h2 id="r-name"></h2></div>
+            <h2>Personnel Data Sheet</h2>
             <dl id="r-dl"></dl>
           </div>
         </div>
@@ -274,10 +274,9 @@ function showResult(text){
   const o=parse(text);
   if(!o){ $("result").hidden=true; $("scan-status").innerHTML='<span class="err">This QR is not a MedTag. Its text is shown on the right.</span>'; return; }
   $("scan-status").textContent="Details read from the QR link.";
-  $("r-rank").textContent=o.RANK||"";
-  $("r-name").textContent=o.NAME||"Name not given";
   $("r-bg").textContent=o.BG||"--";
-  const rows=[["Army no.",o.NO],["Unit / Fmn",o.UNIT],["DOB",o.DOB?o.DOB+age(o.DOB):""],["Emergency no.",o.ICE],["Medical history",o.COND],["Allergy",o.ALG,true]];
+  const dmy=d=>{const m=/^(\d{4})-(\d{2})-(\d{2})$/.exec(d||"");return m?`${m[3]}/${m[2]}/${m[1]}`:(d||"");};
+  const rows=[["Rank",o.RANK],["Name",o.NAME],["Army No",o.NO],["Unit / Formation",o.UNIT],["DOB",o.DOB?dmy(o.DOB)+age(o.DOB):""],["Blood Group",o.BG],["Emergency Contact No",o.ICE],["Medical History",o.COND],["Allergy (if any)",o.ALG,true]];
   const dl=$("r-dl"); dl.textContent="";
   for(const [k,v,alert] of rows){ if(!v) continue; const dt=document.createElement("dt"); dt.textContent=k; const dd=document.createElement("dd"); dd.textContent=v; if(alert) dd.className="alert"; dl.append(dt,dd); }
   const im=o.IMG; const p=$("r-photo");
